@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusBook — Бронирование ресурсов кампуса</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo">&#x1F3DB; CampusBook</div>
+      <nav class="nav">
+        <a href="#how-it-works">Как это работает</a>
+        <a href="#resources">Ресурсы</a>
+        <a href="#booking">Забронировать</a>
+        <a href="#my-bookings">Мои брони</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>Бронируй ресурсы кампуса <span class="accent">в пару кликов</span></h1>
+      <p class="hero-sub">Переговорки, коворкинги, оборудование и консультации — всё в одном месте. Никаких чатов и конфликтов.</p>
+      <a href="#booking" class="btn btn-primary btn-lg">Забронировать сейчас</a>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" class="section">
+    <div class="container">
+      <h2>Как это работает</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Выберите ресурс</h3>
+          <p>Просмотрите каталог доступных переговорок, коворкингов и оборудования.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Укажите время</h3>
+          <p>Выберите дату и временной слот, который вам подходит.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Подтвердите бронь</h3>
+          <p>Нажмите одну кнопку — и ресурс за вами. Без переписок в чатах.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resources catalog -->
+  <section id="resources" class="section section-alt">
+    <div class="container">
+      <h2>Доступные ресурсы</h2>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Поиск по названию или описанию..." />
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" data-type="all">Все</button>
+        <button class="filter-btn" data-type="room">Переговорные</button>
+        <button class="filter-btn" data-type="coworking">Коворкинги</button>
+        <button class="filter-btn" data-type="equipment">Оборудование</button>
+        <button class="filter-btn" data-type="consultation">Консультации</button>
+      </div>
+      <div class="cards" id="resource-cards"></div>
+    </div>
+  </section>
+
+  <!-- Booking form -->
+  <section id="booking" class="section">
+    <div class="container">
+      <h2>Забронировать ресурс</h2>
+      <form id="booking-form" class="booking-form">
+        <div class="form-group">
+          <label for="user-name">Ваше имя</label>
+          <input type="text" id="user-name" placeholder="Иван Иванов" required />
+        </div>
+        <div class="form-group">
+          <label for="resource-select">Ресурс</label>
+          <select id="resource-select" required>
+            <option value="">— Выберите ресурс —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="booking-date">Дата</label>
+          <input type="date" id="booking-date" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="time-start">Начало</label>
+            <select id="time-start" required></select>
+          </div>
+          <div class="form-group">
+            <label for="time-end">Конец</label>
+            <select id="time-end" required></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="purpose">Цель бронирования</label>
+          <input type="text" id="purpose" placeholder="Проектная встреча" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Забронировать</button>
+      </form>
+      <div id="booking-success" class="alert alert-success hidden">
+        Бронирование успешно создано!
+      </div>
+      <div id="booking-error" class="alert alert-error hidden"></div>
+    </div>
+  </section>
+
+  <!-- My bookings -->
+  <section id="my-bookings" class="section section-alt">
+    <div class="container">
+      <h2>Мои бронирования</h2>
+      <div id="bookings-stats" class="bookings-stats"></div>
+      <div id="bookings-list" class="bookings-list">
+        <p class="empty-state">Пока нет бронирований. Создайте первое!</p>
+      </div>
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn btn-primary" onclick="exportBookings()" id="export-btn" style="display:none;">Скачать JSON</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>CampusBook &copy; 2026 — Курсовой MVP-проект, Innopolis University</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
