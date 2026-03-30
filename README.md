@@ -14,6 +14,7 @@
 | 2 | Пользователь, функции, user flow | [hw2-user-functions-userflow.md](notes/hw2-user-functions-userflow.md) | [02-mvp-scope.md](prompts/02-mvp-scope.md) |
 | 3 | Лендинг с интерактивными сценариями | [hw3-landing-interactive.md](notes/hw3-landing-interactive.md) | [04-landing-generation.md](prompts/04-landing-generation.md) |
 | 4 | Улучшения MVP, архитектура | [hw4-improvements-architecture.md](notes/hw4-improvements-architecture.md) | [05-mvp-improvements.md](prompts/05-mvp-improvements.md) |
+| 5 | Декомпозиция MVP (16 блоков) | [hw5-mvp-decomposition-table.md](notes/hw5-mvp-decomposition-table.md) | — |
 
 Дополнительно: [сравнение слабого/среднего/сильного промпта](prompts/03-weak-medium-strong-prompts.md) (урок 2).
 
