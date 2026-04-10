@@ -31,7 +31,7 @@
 | [v3-v4](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v3-v4) | `1121e99` | Лендинг + интерактивный каталог, фильтры, localStorage |
 | [v4.2](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v4.2) | `598a378` | hw4.2: полная декомпозиция MVP (16 блоков) |
 | [v5](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v5) | `b35e2ec` | hw5: тёмная тема, модал отмены, сортировка броней |
-| [v6](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v6) | `24068a3` | hw6: Supabase + email-авторизация (fallback → localStorage) |
+| [v6](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v6) | `9c3b701` | hw6: Supabase + email-авторизация (реальный проект подключён) |
 
 ## Лендинг MVP
 
