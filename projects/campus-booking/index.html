@@ -17,6 +17,14 @@
         <a href="#resources">Ресурсы</a>
         <a href="#booking">Забронировать</a>
         <a href="#my-bookings">Мои брони</a>
+        <span class="auth-area" id="auth-area">
+          <button type="button" class="btn-auth hidden" id="btn-open-auth">Войти</button>
+          <div id="auth-user-wrap" class="auth-user-wrap hidden">
+            <span id="auth-email"></span>
+            <button type="button" id="btn-logout" class="btn-secondary">Выйти</button>
+          </div>
+        </span>
+        <button class="theme-toggle" id="theme-toggle" title="Переключить тему">🌙 Тёмная</button>
       </nav>
     </div>
   </header>
@@ -76,6 +84,11 @@
   <section id="booking" class="section">
     <div class="container">
       <h2>Забронировать ресурс</h2>
+      <div id="booking-gate" class="booking-gate hidden">
+        <p>Чтобы создавать бронирования, войдите или зарегистрируйтесь (режим с подключённой базой Supabase).</p>
+        <button type="button" class="btn btn-primary" id="open-auth-from-gate">Войти / Регистрация</button>
+      </div>
+      <div id="booking-form-wrap">
       <form id="booking-form" class="booking-form">
         <div class="form-group">
           <label for="user-name">Ваше имя</label>
@@ -111,6 +124,7 @@
         Бронирование успешно создано!
       </div>
       <div id="booking-error" class="alert alert-error hidden"></div>
+      </div>
     </div>
   </section>
 
@@ -119,6 +133,14 @@
     <div class="container">
       <h2>Мои бронирования</h2>
       <div id="bookings-stats" class="bookings-stats"></div>
+      <div class="bookings-controls">
+        <label for="sort-select">Сортировка:</label>
+        <select id="sort-select">
+          <option value="created-desc">Новые первые</option>
+          <option value="date-asc">По дате брони</option>
+          <option value="status">По статусу</option>
+        </select>
+      </div>
       <div id="bookings-list" class="bookings-list">
         <p class="empty-state">Пока нет бронирований. Создайте первое!</p>
       </div>
@@ -135,6 +157,47 @@
     </div>
   </footer>
 
+  <!-- Cancel confirmation modal -->
+  <!-- Auth modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal modal-wide">
+      <h3 id="auth-modal-title">Вход</h3>
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-auth-tab="login">Вход</button>
+        <button type="button" class="auth-tab" data-auth-tab="register">Регистрация</button>
+      </div>
+      <form id="auth-form" class="auth-form">
+        <div class="form-group">
+          <label for="auth-email-input">Email</label>
+          <input type="email" id="auth-email-input" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="auth-password-input">Пароль</label>
+          <input type="password" id="auth-password-input" required minlength="6" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary" id="auth-submit-btn" style="width:100%;">Войти</button>
+        <div class="auth-error" id="auth-error"></div>
+      </form>
+      <div class="modal-actions" style="margin-top:16px;justify-content:center;">
+        <button type="button" class="btn btn-secondary" id="auth-modal-close">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="cancel-modal">
+    <div class="modal">
+      <h3>Отменить бронирование?</h3>
+      <p>Это действие нельзя отменить.</p>
+      <div class="modal-details" id="modal-details"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="modal-back">Назад</button>
+        <button class="btn btn-danger" id="modal-confirm">Отменить бронь</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.js"></script>
+  <script src="supabase-config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
