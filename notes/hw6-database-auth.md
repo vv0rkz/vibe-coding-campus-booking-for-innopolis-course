@@ -102,6 +102,8 @@
 
 После деплоя на хостинг: в **Supabase → Authentication → URL configuration** добавьте **Site URL** и **Redirect URLs** вашего опубликованного сайта (см. раздел «Деплой» в корневом `README.md`).
 
+> **Важно про htmlpreview:** для демо через [htmlpreview.github.io](https://htmlpreview.github.io) supabase-js намеренно положен локально (`vendor/supabase.min.js`), а не подключается с CDN — внешние скрипты блокируются прокси-рендерером и адблокерами. Supabase Auth при этом работает в части хранения сессии, но email-редиректы требуют полноценного хостинга (GitHub Pages / Vercel).
+
 ---
 
 ## 4. Тестирование
@@ -152,7 +154,36 @@
 
 ---
 
-## 6. Дальнейшие шаги
+## 6. Деплой и демо
+
+### Варианты публикации
+
+| Вариант | Supabase Auth | Как |
+|---------|--------------|-----|
+| **htmlpreview** (из git-тега) | Частично (сессия работает, email-redirect — нет) | Ссылка вида `htmlpreview.github.io/?https://github.com/.../blob/v6/.../index.html` |
+| **GitHub Pages** | Полностью | Settings → Pages → main / root; добавить URL в Supabase Auth |
+| **Vercel / Netlify** | Полностью | Connect repo, root = `projects/campus-booking/` |
+| **Replit** | Полностью | Import from GitHub, Run |
+
+### Почему supabase-js лежит локально (vendor/)
+
+При открытии через htmlpreview или при заблокированном CDN (адблокер) скрипт с jsdelivr не загружается — Supabase инициализация не происходит, сайт падает в fallback-режим (localStorage).
+
+Решение: `projects/campus-booking/vendor/supabase.min.js` — библиотека закоммичена прямо в репо. Подключение: `<script src="vendor/supabase.min.js">`. htmlpreview подгружает его как относительный файл из того же blob-URL.
+
+### Настройка Supabase URL для деплоя
+
+```
+Supabase Dashboard
+  → Authentication
+    → URL Configuration
+      Site URL:      https://vv0rkz.github.io/vibe-coding-campus-booking-for-innopolis-course/projects/campus-booking/
+      Redirect URLs: тот же адрес (+ localhost:8000 для локальной разработки)
+```
+
+---
+
+## 7. Дальнейшие шаги
 
 | Шаг | Описание | Статус |
 |-----|----------|--------|
