@@ -16,9 +16,9 @@
 | 4 | Улучшения MVP, архитектура | [hw4-improvements-architecture.md](notes/hw4-improvements-architecture.md) | [05-mvp-improvements.md](prompts/05-mvp-improvements.md) | [v3-v4](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v3-v4) | [▶ демо](https://htmlpreview.github.io/?https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/blob/v3-v4/projects/campus-booking/index.html) |
 | 4.2 | Декомпозиция MVP (16 блоков) | [hw4_2-mvp-decomposition-table.md](notes/hw4_2-mvp-decomposition-table.md) | — | [v4.2](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v4.2) | [▶ демо](https://htmlpreview.github.io/?https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/blob/v4.2/projects/campus-booking/index.html) |
 | 5 | Улучшения MVP через Cursor | [hw5-cursor-improvements.md](notes/hw5-cursor-improvements.md) | [05-cursor-improvements.md](prompts/05-cursor-improvements.md) | [v5](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v5) | [▶ демо](https://htmlpreview.github.io/?https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/blob/v5/projects/campus-booking/index.html) |
-| 6 | Подключение БД и авторизация | [hw6-database-auth.md](notes/hw6-database-auth.md) | [06-database-auth.md](prompts/06-database-auth.md) | [v6](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v6) | [▶ демо](https://htmlpreview.github.io/?https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/blob/v6/projects/campus-booking/index.html) |
+| 6 | Подключение БД и авторизация | [hw6-database-auth.md](notes/hw6-database-auth.md) | [06-database-auth.md](prompts/06-database-auth.md) | [v6](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v6) | [▶ демо](https://campus-booking.vercel.app) |
 
-> Столбец **Демо** — статический снимок проекта через [htmlpreview.github.io](https://htmlpreview.github.io) на момент сдачи домашки (привязан к git-тегу), без отдельного деплоя.
+> Столбец **Демо** — статический снимок проекта через [htmlpreview.github.io](https://htmlpreview.github.io) на момент сдачи домашки (привязан к git-тегу), без отдельного деплоя. hw6 задеплоен полноценно на Vercel: [campus-booking.vercel.app](https://campus-booking.vercel.app).
 
 Дополнительно: [сравнение слабого/среднего/сильного промпта](prompts/03-weak-medium-strong-prompts.md) (урок 2).
 
@@ -44,15 +44,17 @@
 - `supabase-config.example.js` — шаблон конфига
 - `supabase/schema.sql` — создание таблицы `bookings` и RLS в Supabase
 
-## Деплой (где лежит опубликованный сайт)
+## Деплой
 
-| Вариант | Куда кладётся сборка | Типичный URL |
-|---------|----------------------|--------------|
-| **GitHub Pages** | Ветка `gh-pages` или папка `/docs`, либо корень репо с настройкой «folder» | `https://<user>.github.io/<repo>/projects/campus-booking/` |
-| **Vercel / Netlify** | Подключить репозиторий, **root** указать `projects/campus-booking` (или весь репо и настроить publish directory) | Домен вида `*.vercel.app` / `*.netlify.app` |
-| **Replit** | Импорт с GitHub, запуск статики | Публичная ссылка Replit |
+**Живой сайт:** [https://campus-booking.vercel.app](https://campus-booking.vercel.app)
 
-Для **hw6 (Supabase Auth)** после публикации откройте в проекте Supabase: **Authentication → URL configuration** и задайте **Site URL** вашего деплоя (например `https://user.github.io/repo/projects/campus-booking/`) и добавьте тот же адрес в **Redirect URLs**, иначе редирект после входа может не сработать.
+Задеплоен через Vercel CLI из папки `projects/campus-booking/`. Supabase Auth настроен на `https://campus-booking.vercel.app` (Site URL + Redirect URLs).
+
+Для передеплоя после изменений:
+```bash
+cd projects/campus-booking
+vercel --prod
+```
 
 Ключи в `supabase-config.js` попадают в публичный репозиторий — это нормально для **anon key** при корректных RLS; service role в клиент не вставлять.
 
