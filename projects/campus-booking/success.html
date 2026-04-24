@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Оплата — CampusBook</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12l5 5L20 7"/></symbol>
+    <symbol id="i-hourglass" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M6 2h12M6 22h12M7 2c0 6 5 6 5 10s-5 4-5 10M17 2c0 6-5 6-5 10s5 4 5 10"/></symbol>
+  </svg>
+
+  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+    <div class="modal" style="max-width:440px;width:100%;text-align:center;">
+      <div style="display:flex;justify-content:center;color:var(--accent);margin-bottom:12px;">
+        <svg class="icon icon-lg"><use href="#i-hourglass"/></svg>
+      </div>
+      <h3>Оплата почти завершена</h3>
+      <p>
+        Мы получили запрос на оплату. Доступ к PRO-тарифу активируется после
+        подтверждения платежа платёжным провайдером (ЮKassa / CloudPayments).
+      </p>
+      <p style="font-size:.8rem;color:var(--text-faint);margin-top:-6px;">
+        В учебном MVP здесь должен быть серверный webhook от платёжного шлюза,
+        который обновит <code>profiles.paid = true</code> только после проверки подписи.
+      </p>
+      <div class="modal-actions" style="justify-content:center;margin-top:20px;">
+        <a href="index.html" class="btn btn-primary">Вернуться в приложение</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

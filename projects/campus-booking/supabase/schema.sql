@@ -1,5 +1,9 @@
--- CampusBook: таблица бронирований + RLS (выполнить в Supabase → SQL Editor)
+-- CampusBook: таблицы bookings + profiles + RLS
+-- Выполнить в Supabase → SQL Editor
 
+-- =========================================================
+-- 1) Таблица bookings (из hw6)
+-- =========================================================
 create table if not exists public.bookings (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -18,14 +22,62 @@ create index if not exists bookings_resource_date_idx on public.bookings (resour
 alter table public.bookings enable row level security;
 
 -- Свои строки + все активные (для проверки пересечений на клиенте)
+drop policy if exists "bookings_select" on public.bookings;
 create policy "bookings_select"
   on public.bookings for select to authenticated
   using (user_id = auth.uid() or status = 'active');
 
+drop policy if exists "bookings_insert" on public.bookings;
 create policy "bookings_insert"
   on public.bookings for insert to authenticated
   with check (user_id = auth.uid());
 
+drop policy if exists "bookings_update_own" on public.bookings;
 create policy "bookings_update_own"
   on public.bookings for update to authenticated
   using (user_id = auth.uid());
+
+-- =========================================================
+-- 2) Таблица profiles (hw10 — paywall, hw7 — display_name)
+-- =========================================================
+create table if not exists public.profiles (
+  id uuid primary key references auth.users (id) on delete cascade,
+  email text,
+  display_name text,
+  paid boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+-- SELECT — только свой профиль
+drop policy if exists "profiles_select_own" on public.profiles;
+create policy "profiles_select_own"
+  on public.profiles for select to authenticated
+  using (id = auth.uid());
+
+-- INSERT — только свой профиль, и только с paid = false
+-- (фронт не может сделать себя PRO в обход webhook)
+drop policy if exists "profiles_insert_own" on public.profiles;
+create policy "profiles_insert_own"
+  on public.profiles for insert to authenticated
+  with check (id = auth.uid() and paid = false);
+
+-- UPDATE — свой профиль, но менять можно только display_name.
+-- paid апдейтится через service_role (серверный webhook от платёжки, hw11).
+drop policy if exists "profiles_update_own_name" on public.profiles;
+create policy "profiles_update_own_name"
+  on public.profiles for update to authenticated
+  using (id = auth.uid())
+  with check (id = auth.uid() and paid = (select paid from public.profiles where id = auth.uid()));
+
+-- Обновление updated_at триггером
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$
+begin new.updated_at = now(); return new; end; $$;
+
+drop trigger if exists profiles_touch_updated_at on public.profiles;
+create trigger profiles_touch_updated_at
+before update on public.profiles
+for each row execute function public.touch_updated_at();

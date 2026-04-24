@@ -6,3 +6,7 @@ window.CAMPUSBOOK_SUPABASE = {
   url: 'https://rzbptfswcksvodfmbsgp.supabase.co',
   anonKey: 'sb_publishable_b8KYrfA1Ztu7Ryb0VQIQOQ_aWjavaJJ',
 };
+
+// Microsoft Clarity — ID трекера. Пусто = аналитика отключена.
+// Получить на clarity.microsoft.com → Settings → Install → Tracking code.
+window.CAMPUSBOOK_CLARITY_ID = '';
