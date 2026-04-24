@@ -32,12 +32,15 @@
 ## Что умеет продукт сейчас
 
 - **Каталог ресурсов** с фильтрами (переговорные / коворкинги / оборудование / консультации) и поиском.
-- **Google-Calendar-style календарь**: день, клик-клик-выбор диапазона, занятые слоты визуализированы блоками, подсветка «сейчас», навигация по дням.
-- **Email-регистрация + вход** через Supabase Auth с нативной валидацией.
+- **FullCalendar v6**: дневной вид, выбор диапазона drag-and-drop, слоты по 15 минут, индикатор текущего времени, прошедшие слоты визуально закрыты.
+- **Bottom sheet бронирования**: при выборе диапазона снизу всплывает панель — не перекрывает весь экран.
+- **Редактирование и удаление брони**: клик на свою бронь открывает модалку с изменением времени, назначения и кнопкой удаления.
+- **Datepicker с ограничением**: Flatpickr на дате навигации, нельзя выбрать прошедшую дату.
+- **Email-регистрация + вход** через Supabase Auth; тост-уведомления при успехе через Toastify.
 - **Профиль пользователя**: аватар с инициалами в хедере, dropdown-меню с email / счётчиками / тарифом, отдельная модалка с редактированием display name.
-- **Google Calendar интеграция**: после брони — одноклик-добавление в Google Calendar (и в карточке каждой активной брони есть иконка).
+- **Google Calendar интеграция**: после брони — одноклик-добавление в Google Calendar.
 - **Paywall**: Free-тариф до 3 активных броней, после — экран оплаты 199 ₽.
-- **Безопасность**: cooldown 3 сек на бронь, «Я не робот», RLS-политики запрещают фронту менять `paid`, `success.html` — не даёт PRO.
+- **Безопасность**: RLS-политики запрещают фронту менять `paid`, `success.html` — не даёт PRO.
 - **Аналитика**: опциональный Microsoft Clarity через `supabase-config.js`.
 - **Тёмная тема** с переключателем-иконкой.
 
@@ -51,7 +54,8 @@
 | [v4.2](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v4.2) | `598a378` | hw4.2: полная декомпозиция MVP (16 блоков) |
 | [v5](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v5) | `b35e2ec` | hw5: тёмная тема, модал отмены, сортировка броней |
 | [v6](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/v6) | `9c3b701` | hw6: Supabase + email-авторизация |
-| v7–v11 | — | hw7: профиль, валидация, новый хедер · hw8: деплой-док · hw9: Clarity · hw10: paywall · hw11: безопасность · + календарь, Google Calendar add-to-calendar |
+| v7–v11 | — | hw7: профиль, валидация, новый хедер · hw8: деплой-dok · hw9: Clarity · hw10: paywall · hw11: безопасность · + Google Calendar add-to-calendar |
+| [main](https://github.com/vv0rkz/vibe-coding-campus-booking-for-innopolis-course/tree/main) | `39cdc8f` | FullCalendar v6, 15-мин слоты, bottom sheet, редактирование/удаление брони, Flatpickr, Toastify |
 
 ## Лендинг MVP
 
