@@ -341,6 +341,7 @@ function initFullCalendar() {
 function renderCalendar() {
   const dateText = document.getElementById('cal-date-text');
   if (dateText) dateText.textContent = formatDateRu(calDate);
+  updateBuildingStatus();
   if (!fcCalendar) return;
   fcCalendar.gotoDate(calDate);
   fcCalendar.refetchEvents();
@@ -945,6 +946,95 @@ function initClarity() {
   })(window, document, "clarity", "script", id);
 }
 
+// ===== Building facade view =====
+let bldViewActive = false;
+
+function switchView(view) {
+  bldViewActive = view === 'building';
+  const fcEl   = document.getElementById('fc-calendar');
+  const bldEl  = document.getElementById('building-view');
+  const hintEl = document.getElementById('cal-hint');
+  const calBtn = document.getElementById('view-calendar-btn');
+  const bldBtn = document.getElementById('view-building-btn');
+
+  if (bldViewActive) {
+    fcEl?.classList.add('hidden');
+    hintEl?.classList.add('hidden');
+    bldEl?.classList.remove('hidden');
+    calBtn?.classList.remove('active');
+    bldBtn?.classList.add('active');
+    updateBuildingStatus();
+  } else {
+    fcEl?.classList.remove('hidden');
+    hintEl?.classList.remove('hidden');
+    bldEl?.classList.add('hidden');
+    calBtn?.classList.add('active');
+    bldBtn?.classList.remove('active');
+  }
+}
+
+function getRoomStatusForDate(resourceId) {
+  const bookings = bookingsCache.filter(b =>
+    b.resourceId === resourceId && b.date === calDate && b.status === 'active'
+  );
+  if (!bookings.length) return 'free';
+  if (bookings.some(b => b._userId === currentUser?.id)) return 'mine';
+  return 'busy';
+}
+
+function updateBuildingStatus() {
+  if (!bldViewActive) return;
+  document.querySelectorAll('#building-svg .bld-room').forEach(g => {
+    const status = getRoomStatusForDate(g.dataset.roomId);
+    g.classList.remove('status-free', 'status-busy', 'status-mine');
+    g.classList.add('status-' + status);
+  });
+}
+
+// Floating tooltip element (created once)
+const _bldTip = document.createElement('div');
+_bldTip.className = 'bld-tooltip';
+document.body.appendChild(_bldTip);
+
+function _showBldTip(e, roomId) {
+  const res = RESOURCES.find(r => r.id === roomId);
+  if (!res) return;
+  const status = getRoomStatusForDate(roomId);
+  const statusText = { free: '🟢 Свободно сегодня', busy: '🔴 Занято', mine: '🔵 Моя бронь' }[status];
+  _bldTip.innerHTML = `<strong>${res.name}</strong><br><span>${statusText}</span>`;
+  _bldTip.classList.add('visible');
+  _moveBldTip(e);
+}
+function _moveBldTip(e) {
+  _bldTip.style.left = (e.clientX + 14) + 'px';
+  _bldTip.style.top  = (e.clientY - 44) + 'px';
+}
+function _hideBldTip() { _bldTip.classList.remove('visible'); }
+
+function _selectBldRoom(roomId) {
+  calResourceId = roomId;
+  const sel = document.getElementById('resource-select');
+  if (sel) sel.value = roomId;
+  switchView('calendar');
+  document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' });
+  selStart = null; selEnd = null;
+  renderCalendar();
+}
+
+function initBuildingView() {
+  document.getElementById('view-calendar-btn')?.addEventListener('click', () => switchView('calendar'));
+  document.getElementById('view-building-btn')?.addEventListener('click', () => switchView('building'));
+
+  document.querySelectorAll('#building-svg .bld-room').forEach(g => {
+    const roomId = g.dataset.roomId;
+    g.addEventListener('mouseenter', e => _showBldTip(e, roomId));
+    g.addEventListener('mousemove',  e => _moveBldTip(e));
+    g.addEventListener('mouseleave', _hideBldTip);
+    g.addEventListener('click', () => _selectBldRoom(roomId));
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') _selectBldRoom(roomId); });
+  });
+}
+
 // ===== Short DOM helper =====
 function $(s) { return document.querySelector(s); }
 
@@ -961,6 +1051,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initSupabaseAndAuth();
   if (!useSupabase) { renderBookings(); renderStats(); }
   initFullCalendar();
+  initBuildingView();
   renderCalendar();
 
   // Booking form
