@@ -680,6 +680,17 @@ body.dark #theme-toggle .icon-moon { display: none; }
   margin: 4px 0 0;
 }
 
+/* ===== Offline banner ===== */
+.offline-banner {
+  background: #fef3c7; color: #92400e;
+  border-bottom: 1px solid #fbbf24;
+  padding: 10px 24px; font-size: .875rem;
+  text-align: center; position: sticky; top: 0; z-index: 500;
+}
+[data-theme="dark"] .offline-banner {
+  background: #422006; color: #fcd34d; border-color: #92400e;
+}
+
 /* ===== Admin Panel ===== */
 .modal-admin {
   max-width: 560px; max-height: 90vh;

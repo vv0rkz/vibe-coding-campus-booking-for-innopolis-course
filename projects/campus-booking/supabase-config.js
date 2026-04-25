@@ -5,6 +5,10 @@
 window.CAMPUSBOOK_SUPABASE = {
   url: 'https://rzbptfswcksvodfmbsgp.supabase.co',
   anonKey: 'sb_publishable_b8KYrfA1Ztu7Ryb0VQIQOQ_aWjavaJJ',
+
+  // Email, которому автоматически даётся доступ к AdminPanel
+  // Зарегистрируйтесь с этим адресом — кнопка ⚙ появится сразу.
+  adminEmail: 'admin@campusbook.ru',
 };
 
 // Microsoft Clarity — ID трекера. Пусто = аналитика отключена.

@@ -101,6 +101,30 @@ function getMyBookings() {
 }
 function getActiveBookings(list) { return list.filter(b => b.status === 'active'); }
 
+// ===== Connectivity check =====
+async function checkSupabaseReachable(url, anonKey) {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(url + '/rest/v1/', {
+      signal: ctrl.signal,
+      headers: { apikey: anonKey },
+    });
+    clearTimeout(t);
+    return res.status < 500;
+  } catch {
+    return false;
+  }
+}
+
+function showOfflineBanner(reason) {
+  const b = document.getElementById('offline-banner');
+  if (b) { b.textContent = reason; b.classList.remove('hidden'); }
+}
+function hideOfflineBanner() {
+  document.getElementById('offline-banner')?.classList.add('hidden');
+}
+
 // ===== Supabase init =====
 async function initSupabaseAndAuth() {
   if (!isSupabaseConfigured()) {
@@ -115,6 +139,17 @@ async function initSupabaseAndAuth() {
     updateAuthUI(); updateBookingGate(); return;
   }
   const cfg = window.CAMPUSBOOK_SUPABASE;
+
+  // Connectivity check — detect VPN/region block
+  const reachable = await checkSupabaseReachable(cfg.url.trim(), cfg.anonKey.trim());
+  if (!reachable) {
+    showOfflineBanner('⚠️ Supabase недоступен (возможно, заблокирован провайдером). Работаем в оффлайн-режиме (localStorage). Попробуйте VPN.');
+    useSupabase = false; sbClient = null; currentUser = null; currentProfile = null;
+    bookingsCache = loadBookingsFromLS();
+    updateAuthUI(); updateBookingGate(); return;
+  }
+  hideOfflineBanner();
+
   useSupabase = true;
   sbClient = createClient(cfg.url.trim(), cfg.anonKey.trim());
 
@@ -199,11 +234,15 @@ function updateAuthUI() {
     openAuth.classList.remove('hidden');
     closeProfileMenu();
   }
-  // Admin button: visible when no Supabase (dev) OR logged-in admin
+  // Admin button: no Supabase (dev) OR adminEmail match OR is_admin flag
   const adminBtn = document.getElementById('btn-admin');
   if (adminBtn) {
-    const canAdmin = !useSupabase || (currentUser && currentProfile?.is_admin);
-    adminBtn.classList.toggle('hidden', !canAdmin);
+    const cfgAdminEmail = window.CAMPUSBOOK_SUPABASE?.adminEmail?.trim().toLowerCase();
+    const userEmail = currentUser?.email?.trim().toLowerCase();
+    const isAdmin = !useSupabase
+      || (currentUser && currentProfile?.is_admin)
+      || (currentUser && cfgAdminEmail && userEmail === cfgAdminEmail);
+    adminBtn.classList.toggle('hidden', !isAdmin);
   }
 }
 
