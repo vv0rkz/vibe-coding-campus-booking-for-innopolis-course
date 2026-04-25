@@ -252,7 +252,9 @@ function renderProfileMenuStats() {
   const mine = getMyBookings();
   const active = getActiveBookings(mine).length;
   const total = mine.length;
-  const plan = currentProfile?.paid ? 'PRO' : 'Free';
+  const cfgAdminEmail = window.CAMPUSBOOK_SUPABASE?.adminEmail?.trim().toLowerCase();
+  const isAdmin = currentProfile?.is_admin || (cfgAdminEmail && currentUser?.email?.trim().toLowerCase() === cfgAdminEmail);
+  const plan = isAdmin ? 'Admin' : (currentProfile?.paid ? 'PRO' : 'Free');
   el.innerHTML = `
     <div class="ps-item"><div class="ps-num">${active}</div><div class="ps-label">Активных</div></div>
     <div class="ps-item"><div class="ps-num">${total}</div><div class="ps-label">Всего</div></div>
@@ -905,7 +907,12 @@ function showProfileModal() {
   $('#profile-display-name').value = currentProfile?.display_name || '';
   $('#profile-email-input').value = currentUser.email || '';
   const plan = $('#profile-plan');
-  if (currentProfile?.paid) {
+  const cfgAdminEmail2 = window.CAMPUSBOOK_SUPABASE?.adminEmail?.trim().toLowerCase();
+  const isAdmin = currentProfile?.is_admin || (cfgAdminEmail2 && currentUser?.email?.trim().toLowerCase() === cfgAdminEmail2);
+  if (isAdmin) {
+    plan.textContent = 'Тариф: Admin — полный доступ';
+    plan.classList.add('paid');
+  } else if (currentProfile?.paid) {
     plan.textContent = 'Тариф: PRO — полный доступ';
     plan.classList.add('paid');
   } else {
@@ -1195,10 +1202,11 @@ async function seedResources() {
 // ===== Admin Panel =====
 function showAdminModal() {
   renderAdminResourceList();
-  document.getElementById('admin-modal')?.classList.add('active');
+  hideAdminForm();
+  document.getElementById('admin-modal')?.classList.add('visible');
 }
 function hideAdminModal() {
-  document.getElementById('admin-modal')?.classList.remove('active');
+  document.getElementById('admin-modal')?.classList.remove('visible');
   hideAdminForm();
 }
 function hideAdminForm() {
