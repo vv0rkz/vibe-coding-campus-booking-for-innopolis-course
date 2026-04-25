@@ -561,9 +561,13 @@ body.dark #theme-toggle .icon-moon { display: none; }
 .booking-gate p { color: var(--text-muted); margin: 0; }
 
 /* ===== Building facade view ===== */
-.view-toggle-bar {
-  display: flex; gap: 8px; margin-bottom: 16px;
+.resources-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
 }
+.resources-header h2 { margin: 0; }
+.res-view-toggle { display: flex; gap: 8px; }
+
 .view-tab {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 18px; border: 1px solid var(--border); border-radius: 10px;

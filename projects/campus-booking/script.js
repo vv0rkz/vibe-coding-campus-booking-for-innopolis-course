@@ -949,26 +949,23 @@ function initClarity() {
 // ===== Building facade view =====
 let bldViewActive = false;
 
-function switchView(view) {
+function switchResView(view) {
   bldViewActive = view === 'building';
-  const fcEl   = document.getElementById('fc-calendar');
-  const bldEl  = document.getElementById('building-view');
-  const hintEl = document.getElementById('cal-hint');
-  const calBtn = document.getElementById('view-calendar-btn');
-  const bldBtn = document.getElementById('view-building-btn');
+  const cardsEl = document.getElementById('res-cards-view');
+  const bldEl   = document.getElementById('building-view');
+  const cardsBtn = document.getElementById('res-view-cards-btn');
+  const bldBtn   = document.getElementById('res-view-building-btn');
 
   if (bldViewActive) {
-    fcEl?.classList.add('hidden');
-    hintEl?.classList.add('hidden');
+    cardsEl?.classList.add('hidden');
     bldEl?.classList.remove('hidden');
-    calBtn?.classList.remove('active');
+    cardsBtn?.classList.remove('active');
     bldBtn?.classList.add('active');
     updateBuildingStatus();
   } else {
-    fcEl?.classList.remove('hidden');
-    hintEl?.classList.remove('hidden');
+    cardsEl?.classList.remove('hidden');
     bldEl?.classList.add('hidden');
-    calBtn?.classList.add('active');
+    cardsBtn?.classList.add('active');
     bldBtn?.classList.remove('active');
   }
 }
@@ -1015,15 +1012,14 @@ function _selectBldRoom(roomId) {
   calResourceId = roomId;
   const sel = document.getElementById('resource-select');
   if (sel) sel.value = roomId;
-  switchView('calendar');
   document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' });
   selStart = null; selEnd = null;
   renderCalendar();
 }
 
 function initBuildingView() {
-  document.getElementById('view-calendar-btn')?.addEventListener('click', () => switchView('calendar'));
-  document.getElementById('view-building-btn')?.addEventListener('click', () => switchView('building'));
+  document.getElementById('res-view-cards-btn')?.addEventListener('click', () => switchResView('cards'));
+  document.getElementById('res-view-building-btn')?.addEventListener('click', () => switchResView('building'));
 
   document.querySelectorAll('#building-svg .bld-room').forEach(g => {
     const roomId = g.dataset.roomId;

@@ -104,18 +104,129 @@
   <!-- Resources catalog -->
   <section id="resources" class="section section-alt">
     <div class="container">
-      <h2>Доступные ресурсы</h2>
-      <div class="search-box">
-        <input type="text" id="search-input" placeholder="Поиск по названию или описанию..." />
+      <div class="resources-header">
+        <h2>Доступные ресурсы</h2>
+        <div class="res-view-toggle">
+          <button type="button" class="view-tab active" id="res-view-cards-btn">
+            <svg class="icon"><use href="#i-grid"/></svg> Карточки
+          </button>
+          <button type="button" class="view-tab" id="res-view-building-btn">
+            <svg class="icon"><use href="#i-building"/></svg> Схема здания
+          </button>
+        </div>
       </div>
-      <div class="filters">
-        <button class="filter-btn active" data-type="all">Все</button>
-        <button class="filter-btn" data-type="room">Переговорные</button>
-        <button class="filter-btn" data-type="coworking">Коворкинги</button>
-        <button class="filter-btn" data-type="equipment">Оборудование</button>
-        <button class="filter-btn" data-type="consultation">Консультации</button>
+
+      <!-- Cards view -->
+      <div id="res-cards-view">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Поиск по названию или описанию..." />
+        </div>
+        <div class="filters">
+          <button class="filter-btn active" data-type="all">Все</button>
+          <button class="filter-btn" data-type="room">Переговорные</button>
+          <button class="filter-btn" data-type="coworking">Коворкинги</button>
+          <button class="filter-btn" data-type="equipment">Оборудование</button>
+          <button class="filter-btn" data-type="consultation">Консультации</button>
+        </div>
+        <div class="cards" id="resource-cards"></div>
       </div>
-      <div class="cards" id="resource-cards"></div>
+
+      <!-- Building view -->
+      <div id="building-view" class="building-view hidden">
+        <svg id="building-svg" viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" aria-label="Схема корпуса А">
+
+          <!-- title -->
+          <text class="bld-title" x="340" y="20" text-anchor="middle">КОРПУС А · Иннополис Университет</text>
+
+          <!-- roof tiers -->
+          <rect class="bld-roof-cap" x="160" y="28" width="360" height="8" rx="2"/>
+          <rect class="bld-roof"     x="30"  y="34" width="620" height="18" rx="3"/>
+
+          <!-- building body -->
+          <rect class="bld-body" x="40" y="52" width="600" height="320" rx="2"/>
+
+          <!-- floor separators -->
+          <line class="bld-floor-line" x1="40" y1="116" x2="640" y2="116"/>
+          <line class="bld-floor-line" x1="40" y1="180" x2="640" y2="180"/>
+          <line class="bld-floor-line" x1="40" y1="244" x2="640" y2="244"/>
+          <line class="bld-floor-line" x1="40" y1="308" x2="640" y2="308"/>
+
+          <!-- floor number labels -->
+          <text class="bld-floor-label" x="22" y="88"  text-anchor="middle">5</text>
+          <text class="bld-floor-label" x="22" y="152" text-anchor="middle">4</text>
+          <text class="bld-floor-label" x="22" y="216" text-anchor="middle">3</text>
+          <text class="bld-floor-label" x="22" y="280" text-anchor="middle">2</text>
+          <text class="bld-floor-label" x="22" y="344" text-anchor="middle">1</text>
+
+          <!-- ── FLOOR 5 (y 52–116) ── -->
+          <g class="bld-room" data-room-id="r6" tabindex="0" role="button" aria-label="Консультация — проф. Иванова">
+            <rect class="room-rect" x="52" y="64" width="230" height="42" rx="5"/>
+            <text class="room-label" x="167" y="80" text-anchor="middle">Консультация</text>
+            <text class="room-sub"   x="167" y="97" text-anchor="middle">Проф. Иванова · 5 эт.</text>
+          </g>
+          <rect class="bld-win" x="296" y="72" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="362" y="72" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="428" y="72" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="494" y="72" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="560" y="72" width="70" height="26" rx="3"/>
+
+          <!-- ── FLOOR 4 (y 116–180) ── -->
+          <g class="bld-room" data-room-id="r4" tabindex="0" role="button" aria-label="Зона «Лофт»">
+            <rect class="room-rect" x="52" y="128" width="310" height="42" rx="5"/>
+            <text class="room-label" x="207" y="144" text-anchor="middle">Зона «Лофт»</text>
+            <text class="room-sub"   x="207" y="161" text-anchor="middle">Коворкинг · до 12 чел.</text>
+          </g>
+          <rect class="bld-win" x="374" y="136" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="440" y="136" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="506" y="136" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="572" y="136" width="58" height="26" rx="3"/>
+
+          <!-- ── FLOOR 3 (y 180–244) ── -->
+          <g class="bld-room" data-room-id="r1" tabindex="0" role="button" aria-label="Переговорная «Эврика»">
+            <rect class="room-rect" x="52" y="192" width="576" height="42" rx="5"/>
+            <text class="room-label" x="340" y="208" text-anchor="middle">Переговорная «Эврика»</text>
+            <text class="room-sub"   x="340" y="225" text-anchor="middle">3 этаж · до 6 чел. · проектор, доска</text>
+          </g>
+
+          <!-- ── FLOOR 2 (y 244–308) ── -->
+          <g class="bld-room" data-room-id="r2" tabindex="0" role="button" aria-label="Переговорная «Спринт»">
+            <rect class="room-rect" x="52" y="256" width="258" height="42" rx="5"/>
+            <text class="room-label" x="181" y="272" text-anchor="middle">Переговорная «Спринт»</text>
+            <text class="room-sub"   x="181" y="289" text-anchor="middle">2 этаж · до 4 чел.</text>
+          </g>
+          <rect class="bld-win" x="322" y="264" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="388" y="264" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="454" y="264" width="54" height="26" rx="3"/>
+          <rect class="bld-win" x="520" y="264" width="54" height="26" rx="3"/>
+
+          <!-- ── FLOOR 1 / Ground (y 308–372) ── -->
+          <g class="bld-room" data-room-id="r3" tabindex="0" role="button" aria-label="Коворкинг «Хаб»">
+            <rect class="room-rect" x="52" y="320" width="286" height="42" rx="5"/>
+            <text class="room-label" x="195" y="336" text-anchor="middle">Коворкинг «Хаб»</text>
+            <text class="room-sub"   x="195" y="353" text-anchor="middle">1 этаж · до 20 чел.</text>
+          </g>
+          <g class="bld-room" data-room-id="r5" tabindex="0" role="button" aria-label="Проектор Epson EB-U50">
+            <rect class="room-rect" x="348" y="320" width="180" height="42" rx="5"/>
+            <text class="room-label" x="438" y="336" text-anchor="middle">Epson EB-U50</text>
+            <text class="room-sub"   x="438" y="353" text-anchor="middle">Проектор · выдача</text>
+          </g>
+          <!-- entrance door -->
+          <rect class="bld-door" x="542" y="330" width="88" height="42" rx="3 3 0 0"/>
+          <line class="bld-door-line" x1="586" y1="330" x2="586" y2="372"/>
+          <circle class="bld-door-knob" cx="558" cy="352" r="3.5"/>
+          <circle class="bld-door-knob" cx="614" cy="352" r="3.5"/>
+
+          <!-- ground strip -->
+          <rect class="bld-ground" x="0" y="372" width="680" height="10" rx="0"/>
+        </svg>
+
+        <div class="bld-legend">
+          <span class="bld-lg-item bld-lg-free">Свободно сегодня</span>
+          <span class="bld-lg-item bld-lg-mine">Моя бронь</span>
+          <span class="bld-lg-item bld-lg-busy">Занято</span>
+        </div>
+        <p class="bld-hint">Нажмите на комнату, чтобы перейти к бронированию</p>
+      </div>
     </div>
   </section>
 
@@ -155,113 +266,7 @@
           </div>
         </div>
 
-        <div class="view-toggle-bar">
-          <button type="button" class="view-tab active" id="view-calendar-btn">
-            <svg class="icon"><use href="#i-calendar"/></svg> Календарь
-          </button>
-          <button type="button" class="view-tab" id="view-building-btn">
-            <svg class="icon"><use href="#i-building"/></svg> Схема здания
-          </button>
-        </div>
-
         <div id="fc-calendar"></div>
-
-        <div id="building-view" class="building-view hidden">
-          <svg id="building-svg" viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" aria-label="Схема корпуса А">
-
-            <!-- title -->
-            <text class="bld-title" x="340" y="20" text-anchor="middle">КОРПУС А · Иннополис Университет</text>
-
-            <!-- roof tiers -->
-            <rect class="bld-roof-cap" x="160" y="28" width="360" height="8" rx="2"/>
-            <rect class="bld-roof"     x="30"  y="34" width="620" height="18" rx="3"/>
-
-            <!-- building body -->
-            <rect class="bld-body" x="40" y="52" width="600" height="320" rx="2"/>
-
-            <!-- floor separators -->
-            <line class="bld-floor-line" x1="40" y1="116" x2="640" y2="116"/>
-            <line class="bld-floor-line" x1="40" y1="180" x2="640" y2="180"/>
-            <line class="bld-floor-line" x1="40" y1="244" x2="640" y2="244"/>
-            <line class="bld-floor-line" x1="40" y1="308" x2="640" y2="308"/>
-
-            <!-- floor number labels -->
-            <text class="bld-floor-label" x="22" y="88"  text-anchor="middle">5</text>
-            <text class="bld-floor-label" x="22" y="152" text-anchor="middle">4</text>
-            <text class="bld-floor-label" x="22" y="216" text-anchor="middle">3</text>
-            <text class="bld-floor-label" x="22" y="280" text-anchor="middle">2</text>
-            <text class="bld-floor-label" x="22" y="344" text-anchor="middle">1</text>
-
-            <!-- ── FLOOR 5 (y 52–116) ── -->
-            <g class="bld-room" data-room-id="r6" tabindex="0" role="button" aria-label="Консультация — проф. Иванова">
-              <rect class="room-rect" x="52" y="64" width="230" height="42" rx="5"/>
-              <text class="room-label" x="167" y="80" text-anchor="middle">Консультация</text>
-              <text class="room-sub"   x="167" y="97" text-anchor="middle">Проф. Иванова · 5 эт.</text>
-            </g>
-            <rect class="bld-win" x="296" y="72" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="362" y="72" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="428" y="72" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="494" y="72" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="560" y="72" width="70" height="26" rx="3"/>
-
-            <!-- ── FLOOR 4 (y 116–180) ── -->
-            <g class="bld-room" data-room-id="r4" tabindex="0" role="button" aria-label="Зона «Лофт»">
-              <rect class="room-rect" x="52" y="128" width="310" height="42" rx="5"/>
-              <text class="room-label" x="207" y="144" text-anchor="middle">Зона «Лофт»</text>
-              <text class="room-sub"   x="207" y="161" text-anchor="middle">Коворкинг · до 12 чел.</text>
-            </g>
-            <rect class="bld-win" x="374" y="136" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="440" y="136" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="506" y="136" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="572" y="136" width="58" height="26" rx="3"/>
-
-            <!-- ── FLOOR 3 (y 180–244) ── -->
-            <g class="bld-room" data-room-id="r1" tabindex="0" role="button" aria-label="Переговорная «Эврика»">
-              <rect class="room-rect" x="52" y="192" width="576" height="42" rx="5"/>
-              <text class="room-label" x="340" y="208" text-anchor="middle">Переговорная «Эврика»</text>
-              <text class="room-sub"   x="340" y="225" text-anchor="middle">3 этаж · до 6 чел. · проектор, доска</text>
-            </g>
-
-            <!-- ── FLOOR 2 (y 244–308) ── -->
-            <g class="bld-room" data-room-id="r2" tabindex="0" role="button" aria-label="Переговорная «Спринт»">
-              <rect class="room-rect" x="52" y="256" width="258" height="42" rx="5"/>
-              <text class="room-label" x="181" y="272" text-anchor="middle">Переговорная «Спринт»</text>
-              <text class="room-sub"   x="181" y="289" text-anchor="middle">2 этаж · до 4 чел.</text>
-            </g>
-            <rect class="bld-win" x="322" y="264" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="388" y="264" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="454" y="264" width="54" height="26" rx="3"/>
-            <rect class="bld-win" x="520" y="264" width="54" height="26" rx="3"/>
-
-            <!-- ── FLOOR 1 / Ground (y 308–372) ── -->
-            <g class="bld-room" data-room-id="r3" tabindex="0" role="button" aria-label="Коворкинг «Хаб»">
-              <rect class="room-rect" x="52" y="320" width="286" height="42" rx="5"/>
-              <text class="room-label" x="195" y="336" text-anchor="middle">Коворкинг «Хаб»</text>
-              <text class="room-sub"   x="195" y="353" text-anchor="middle">1 этаж · до 20 чел.</text>
-            </g>
-            <g class="bld-room" data-room-id="r5" tabindex="0" role="button" aria-label="Проектор Epson EB-U50">
-              <rect class="room-rect" x="348" y="320" width="180" height="42" rx="5"/>
-              <text class="room-label" x="438" y="336" text-anchor="middle">Epson EB-U50</text>
-              <text class="room-sub"   x="438" y="353" text-anchor="middle">Проектор · выдача</text>
-            </g>
-            <!-- entrance door -->
-            <rect class="bld-door" x="542" y="330" width="88" height="42" rx="3 3 0 0"/>
-            <line class="bld-door-line" x1="586" y1="330" x2="586" y2="372"/>
-            <circle class="bld-door-knob" cx="558" cy="352" r="3.5"/>
-            <circle class="bld-door-knob" cx="614" cy="352" r="3.5"/>
-
-            <!-- ground strip -->
-            <rect class="bld-ground" x="0" y="372" width="680" height="10" rx="0"/>
-          </svg>
-
-          <!-- legend -->
-          <div class="bld-legend">
-            <span class="bld-lg-item bld-lg-free">Свободно сегодня</span>
-            <span class="bld-lg-item bld-lg-mine">Моя бронь</span>
-            <span class="bld-lg-item bld-lg-busy">Занято</span>
-          </div>
-          <p class="bld-hint">Нажмите на комнату, чтобы перейти к бронированию</p>
-        </div>
 
         <div class="calendar-hint" id="cal-hint">Зажмите и перетащите по слотам, чтобы выбрать интервал.</div>
       </div>
