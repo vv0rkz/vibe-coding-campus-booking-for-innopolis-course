@@ -27,6 +27,10 @@
     <symbol id="i-lock" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M6 11V8a6 6 0 1 1 12 0v3M5 11h14v10H5z"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12l5 5L20 7"/></symbol>
     <symbol id="i-building" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h2M13 9h2M9 13h2M13 13h2M9 17h6"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></symbol>
   </svg>
 
   <!-- Header -->
@@ -53,6 +57,9 @@
       </nav>
 
       <div class="header-actions">
+        <button type="button" class="icon-btn hidden" id="btn-admin" title="Управление ресурсами" aria-label="Администрирование">
+          <svg class="icon"><use href="#i-settings"/></svg>
+        </button>
         <button type="button" class="icon-btn" id="theme-toggle" title="Переключить тему" aria-label="Переключить тему">
           <svg class="icon icon-sun"><use href="#i-sun"/></svg>
           <svg class="icon icon-moon"><use href="#i-moon"/></svg>
@@ -107,17 +114,17 @@
       <div class="resources-header">
         <h2>Доступные ресурсы</h2>
         <div class="res-view-toggle">
-          <button type="button" class="view-tab active" id="res-view-cards-btn">
+          <button type="button" class="view-tab" id="res-view-cards-btn">
             <svg class="icon"><use href="#i-grid"/></svg> Карточки
           </button>
-          <button type="button" class="view-tab" id="res-view-building-btn">
+          <button type="button" class="view-tab active" id="res-view-building-btn">
             <svg class="icon"><use href="#i-building"/></svg> Схема здания
           </button>
         </div>
       </div>
 
       <!-- Cards view -->
-      <div id="res-cards-view">
+      <div id="res-cards-view" class="hidden">
         <div class="search-box">
           <input type="text" id="search-input" placeholder="Поиск по названию или описанию..." />
         </div>
@@ -132,7 +139,7 @@
       </div>
 
       <!-- Building view -->
-      <div id="building-view" class="building-view hidden">
+      <div id="building-view" class="building-view">
         <svg id="building-svg" viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" aria-label="Схема корпуса А">
 
           <!-- title -->
@@ -158,59 +165,9 @@
           <text class="bld-floor-label" x="22" y="280" text-anchor="middle">2</text>
           <text class="bld-floor-label" x="22" y="344" text-anchor="middle">1</text>
 
-          <!-- ── FLOOR 5 (y 52–116) ── -->
-          <g class="bld-room" data-room-id="r6" tabindex="0" role="button" aria-label="Консультация — проф. Иванова">
-            <rect class="room-rect" x="52" y="64" width="230" height="42" rx="5"/>
-            <text class="room-label" x="167" y="80" text-anchor="middle">Консультация</text>
-            <text class="room-sub"   x="167" y="97" text-anchor="middle">Проф. Иванова · 5 эт.</text>
-          </g>
-          <rect class="bld-win" x="296" y="72" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="362" y="72" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="428" y="72" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="494" y="72" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="560" y="72" width="70" height="26" rx="3"/>
+          <!-- rooms + windows generated by renderBuildingSVG() -->
 
-          <!-- ── FLOOR 4 (y 116–180) ── -->
-          <g class="bld-room" data-room-id="r4" tabindex="0" role="button" aria-label="Зона «Лофт»">
-            <rect class="room-rect" x="52" y="128" width="310" height="42" rx="5"/>
-            <text class="room-label" x="207" y="144" text-anchor="middle">Зона «Лофт»</text>
-            <text class="room-sub"   x="207" y="161" text-anchor="middle">Коворкинг · до 12 чел.</text>
-          </g>
-          <rect class="bld-win" x="374" y="136" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="440" y="136" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="506" y="136" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="572" y="136" width="58" height="26" rx="3"/>
-
-          <!-- ── FLOOR 3 (y 180–244) ── -->
-          <g class="bld-room" data-room-id="r1" tabindex="0" role="button" aria-label="Переговорная «Эврика»">
-            <rect class="room-rect" x="52" y="192" width="576" height="42" rx="5"/>
-            <text class="room-label" x="340" y="208" text-anchor="middle">Переговорная «Эврика»</text>
-            <text class="room-sub"   x="340" y="225" text-anchor="middle">3 этаж · до 6 чел. · проектор, доска</text>
-          </g>
-
-          <!-- ── FLOOR 2 (y 244–308) ── -->
-          <g class="bld-room" data-room-id="r2" tabindex="0" role="button" aria-label="Переговорная «Спринт»">
-            <rect class="room-rect" x="52" y="256" width="258" height="42" rx="5"/>
-            <text class="room-label" x="181" y="272" text-anchor="middle">Переговорная «Спринт»</text>
-            <text class="room-sub"   x="181" y="289" text-anchor="middle">2 этаж · до 4 чел.</text>
-          </g>
-          <rect class="bld-win" x="322" y="264" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="388" y="264" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="454" y="264" width="54" height="26" rx="3"/>
-          <rect class="bld-win" x="520" y="264" width="54" height="26" rx="3"/>
-
-          <!-- ── FLOOR 1 / Ground (y 308–372) ── -->
-          <g class="bld-room" data-room-id="r3" tabindex="0" role="button" aria-label="Коворкинг «Хаб»">
-            <rect class="room-rect" x="52" y="320" width="286" height="42" rx="5"/>
-            <text class="room-label" x="195" y="336" text-anchor="middle">Коворкинг «Хаб»</text>
-            <text class="room-sub"   x="195" y="353" text-anchor="middle">1 этаж · до 20 чел.</text>
-          </g>
-          <g class="bld-room" data-room-id="r5" tabindex="0" role="button" aria-label="Проектор Epson EB-U50">
-            <rect class="room-rect" x="348" y="320" width="180" height="42" rx="5"/>
-            <text class="room-label" x="438" y="336" text-anchor="middle">Epson EB-U50</text>
-            <text class="room-sub"   x="438" y="353" text-anchor="middle">Проектор · выдача</text>
-          </g>
-          <!-- entrance door -->
+          <!-- entrance door (static, always floor 1 right side) -->
           <rect class="bld-door" x="542" y="330" width="88" height="42" rx="3 3 0 0"/>
           <line class="bld-door-line" x1="586" y1="330" x2="586" y2="372"/>
           <circle class="bld-door-knob" cx="558" cy="352" r="3.5"/>
@@ -478,6 +435,66 @@
       <div class="modal-actions">
         <button class="btn btn-secondary" id="modal-back">Назад</button>
         <button class="btn btn-danger" id="modal-confirm">Отменить бронь</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin panel modal -->
+  <div class="modal-overlay" id="admin-modal">
+    <div class="modal modal-admin">
+      <button type="button" class="modal-close" id="admin-modal-close" aria-label="Закрыть">
+        <svg class="icon"><use href="#i-close"/></svg>
+      </button>
+      <div class="admin-modal-header">
+        <h3>Управление ресурсами</h3>
+        <button type="button" class="btn btn-primary btn-sm" id="admin-add-btn">
+          <svg class="icon"><use href="#i-plus"/></svg> Добавить
+        </button>
+      </div>
+
+      <div id="admin-resource-list" class="admin-resource-list"></div>
+
+      <div id="admin-form-panel" class="admin-form-panel hidden">
+        <h4 id="admin-form-title">Новый ресурс</h4>
+        <form id="admin-resource-form" novalidate>
+          <input type="hidden" id="admin-form-id" />
+          <div class="admin-form-grid">
+            <div class="form-group">
+              <label for="admin-name">Название</label>
+              <input type="text" id="admin-name" required maxlength="60" placeholder="Переговорная «Эврика»" />
+            </div>
+            <div class="form-group">
+              <label for="admin-type">Тип</label>
+              <select id="admin-type">
+                <option value="room">Переговорная</option>
+                <option value="coworking">Коворкинг</option>
+                <option value="equipment">Оборудование</option>
+                <option value="consultation">Консультация</option>
+              </select>
+            </div>
+            <div class="form-group admin-form-full">
+              <label for="admin-description">Описание</label>
+              <input type="text" id="admin-description" maxlength="200" placeholder="Светлая комната с проектором..." />
+            </div>
+            <div class="form-group">
+              <label for="admin-floor">Этаж</label>
+              <input type="number" id="admin-floor" min="1" max="10" required value="1" />
+            </div>
+            <div class="form-group">
+              <label for="admin-capacity">Вместимость (чел.)</label>
+              <input type="number" id="admin-capacity" min="1" max="500" required value="1" />
+            </div>
+            <div class="form-group admin-form-full">
+              <label for="admin-img">URL изображения</label>
+              <input type="url" id="admin-img" placeholder="https://images.unsplash.com/..." />
+            </div>
+          </div>
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-secondary" id="admin-form-cancel">Отмена</button>
+            <button type="submit" class="btn btn-primary" id="admin-form-save">Сохранить</button>
+          </div>
+          <div id="admin-form-error" class="auth-error"></div>
+        </form>
       </div>
     </div>
   </div>

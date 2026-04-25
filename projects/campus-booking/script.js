@@ -12,7 +12,7 @@
    ============================================================ */
 
 // ===== Resource data =====
-const RESOURCES = [
+const DEFAULT_RESOURCES = [
   { id: 'r1', name: 'Переговорная «Эврика»', type: 'room', description: 'Светлая комната на 6 человек с проектором и маркерной доской.', floor: 3, capacity: 6, img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop' },
   { id: 'r2', name: 'Переговорная «Спринт»', type: 'room', description: 'Компактная переговорка для быстрых стендапов.', floor: 2, capacity: 4, img: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600&h=400&fit=crop' },
   { id: 'r3', name: 'Коворкинг «Хаб»', type: 'coworking', description: 'Открытое пространство на 20 мест для самоподготовки.', floor: 1, capacity: 20, img: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=400&fit=crop' },
@@ -20,6 +20,7 @@ const RESOURCES = [
   { id: 'r5', name: 'Проектор Epson EB-U50', type: 'equipment', description: 'Переносной проектор Full HD. Выдача на ресепшн.', floor: 1, capacity: 1, img: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600&h=400&fit=crop' },
   { id: 'r6', name: 'Консультация — проф. Иванова', type: 'consultation', description: 'ML и анализ данных. 30-минутные слоты.', floor: 5, capacity: 1, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=400&fit=crop' },
 ];
+let RESOURCES = DEFAULT_RESOURCES.map(r => ({ ...r }));
 
 const TYPE_LABELS = { room: 'Переговорная', coworking: 'Коворкинг', equipment: 'Оборудование', consultation: 'Консультация' };
 const BADGE_CLASSES = { room: 'badge-room', coworking: 'badge-coworking', equipment: 'badge-equipment', consultation: 'badge-consultation' };
@@ -197,6 +198,12 @@ function updateAuthUI() {
     wrap.classList.add('hidden');
     openAuth.classList.remove('hidden');
     closeProfileMenu();
+  }
+  // Admin button: visible when no Supabase (dev) OR logged-in admin
+  const adminBtn = document.getElementById('btn-admin');
+  if (adminBtn) {
+    const canAdmin = !useSupabase || (currentUser && currentProfile?.is_admin);
+    adminBtn.classList.toggle('hidden', !canAdmin);
   }
 }
 
@@ -947,15 +954,14 @@ function initClarity() {
 }
 
 // ===== Building facade view =====
-let bldViewActive = false;
+let bldViewActive = true; // building is default view
 
 function switchResView(view) {
   bldViewActive = view === 'building';
-  const cardsEl = document.getElementById('res-cards-view');
-  const bldEl   = document.getElementById('building-view');
+  const cardsEl  = document.getElementById('res-cards-view');
+  const bldEl    = document.getElementById('building-view');
   const cardsBtn = document.getElementById('res-view-cards-btn');
   const bldBtn   = document.getElementById('res-view-building-btn');
-
   if (bldViewActive) {
     cardsEl?.classList.add('hidden');
     bldEl?.classList.remove('hidden');
@@ -970,25 +976,109 @@ function switchResView(view) {
   }
 }
 
-function getRoomStatusForDate(resourceId) {
-  const bookings = bookingsCache.filter(b =>
-    b.resourceId === resourceId && b.date === calDate && b.status === 'active'
-  );
-  if (!bookings.length) return 'free';
-  if (bookings.some(b => b._userId === currentUser?.id)) return 'mine';
-  return 'busy';
+// Detailed realtime status for a resource on calDate
+function getDetailedRoomStatus(resourceId) {
+  const todayStr = todayISO();
+  const dateBookings = bookingsCache
+    .filter(b => b.resourceId === resourceId && b.date === calDate && b.status === 'active')
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  if (calDate < todayStr) return { status: 'free', label: 'Прошедшая дата' };
+  if (!dateBookings.length) return { status: 'free', label: 'Свободно весь день' };
+
+  if (calDate === todayStr) {
+    const now  = new Date();
+    const nowT = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const cur  = dateBookings.find(b => b.startTime <= nowT && nowT < b.endTime);
+    if (cur) return {
+      status: cur._userId === currentUser?.id ? 'mine' : 'busy',
+      label: `Занято до ${cur.endTime}`,
+    };
+    const next = dateBookings.find(b => b.startTime > nowT);
+    if (!next) return { status: 'free', label: 'Свободно сейчас' };
+    return {
+      status: next._userId === currentUser?.id ? 'mine' : 'free',
+      label: `Свободно до ${next.startTime}`,
+    };
+  }
+  // Future date
+  const mine = dateBookings.find(b => b._userId === currentUser?.id);
+  if (mine) return { status: 'mine', label: `Моя бронь ${mine.startTime}–${mine.endTime}` };
+  return { status: 'busy', label: `Занято (${dateBookings.length})` };
 }
 
 function updateBuildingStatus() {
   if (!bldViewActive) return;
   document.querySelectorAll('#building-svg .bld-room').forEach(g => {
-    const status = getRoomStatusForDate(g.dataset.roomId);
+    const { status, label } = getDetailedRoomStatus(g.dataset.roomId);
     g.classList.remove('status-free', 'status-busy', 'status-mine');
     g.classList.add('status-' + status);
+    const sub = g.querySelector('[data-room-sub]');
+    if (sub) sub.textContent = label;
   });
 }
 
-// Floating tooltip element (created once)
+// Dynamic SVG building generation
+function renderBuildingSVG() {
+  const svg = document.getElementById('building-svg');
+  if (!svg) return;
+  svg.querySelectorAll('.bld-room, .bld-win').forEach(el => el.remove());
+
+  const NS = 'http://www.w3.org/2000/svg';
+  function mk(tag, attrs, text) {
+    const e = document.createElementNS(NS, tag);
+    if (attrs) Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, String(v)));
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  const BLD_X = 52, BLD_W = 576;
+  const DOOR_X = 542; // door starts here on floor 1
+  const ROOM_H = 42, ROOM_GAP = 6;
+  const WIN_W  = 52,  WIN_H = 26, WIN_GAP = 8;
+  const FLOOR_Y   = { 1: 320, 2: 256, 3: 192, 4: 128, 5: 64 };
+  const FLOOR_WIN_Y = { 1: 334, 2: 270, 3: 206, 4: 142, 5: 78 };
+
+  const byFloor = {};
+  RESOURCES.forEach(r => {
+    const f = Math.min(Math.max(r.floor || 1, 1), 5);
+    (byFloor[f] = byFloor[f] || []).push(r);
+  });
+
+  [5, 4, 3, 2, 1].forEach(floor => {
+    const rooms  = byFloor[floor] || [];
+    const roomY  = FLOOR_Y[floor];
+    const winY   = FLOOR_WIN_Y[floor];
+    const avail  = floor === 1 ? (DOOR_X - BLD_X - ROOM_GAP) : BLD_W;
+    const n      = rooms.length;
+    const roomW  = n > 0 ? Math.min(300, Math.floor((avail - (n - 1) * ROOM_GAP) / n)) : 0;
+    const blockW = n > 0 ? (n * roomW + (n - 1) * ROOM_GAP) : 0;
+
+    rooms.forEach((res, i) => {
+      const x  = BLD_X + i * (roomW + ROOM_GAP);
+      const cx = x + roomW / 2;
+      const g  = mk('g', { class: 'bld-room', 'data-room-id': res.id, tabindex: '0', role: 'button', 'aria-label': res.name });
+      g.appendChild(mk('rect', { class: 'room-rect', x, y: roomY, width: roomW, height: ROOM_H, rx: 5 }));
+      const label = res.name.length > 24 ? res.name.slice(0, 22) + '…' : res.name;
+      g.appendChild(mk('text', { class: 'room-label', x: cx, y: roomY + 16, 'text-anchor': 'middle' }, label));
+      g.appendChild(mk('text', { class: 'room-sub', x: cx, y: roomY + 33, 'text-anchor': 'middle', 'data-room-sub': res.id },
+        `${floor} эт. · до ${res.capacity} чел.`));
+      svg.appendChild(g);
+    });
+
+    // Decorative windows in leftover space
+    let wx = BLD_X + blockW + (blockW > 0 ? ROOM_GAP * 2 : 0);
+    while (wx + WIN_W <= BLD_X + avail) {
+      svg.appendChild(mk('rect', { class: 'bld-win', x: wx, y: winY, width: WIN_W, height: WIN_H, rx: 3 }));
+      wx += WIN_W + WIN_GAP;
+    }
+  });
+
+  initBuildingRoomEvents();
+  updateBuildingStatus();
+}
+
+// Tooltip (created once)
 const _bldTip = document.createElement('div');
 _bldTip.className = 'bld-tooltip';
 document.body.appendChild(_bldTip);
@@ -996,15 +1086,15 @@ document.body.appendChild(_bldTip);
 function _showBldTip(e, roomId) {
   const res = RESOURCES.find(r => r.id === roomId);
   if (!res) return;
-  const status = getRoomStatusForDate(roomId);
-  const statusText = { free: '🟢 Свободно сегодня', busy: '🔴 Занято', mine: '🔵 Моя бронь' }[status];
-  _bldTip.innerHTML = `<strong>${res.name}</strong><br><span>${statusText}</span>`;
+  const { status, label } = getDetailedRoomStatus(roomId);
+  const icon = { free: '🟢', busy: '🔴', mine: '🔵' }[status] || '⚪';
+  _bldTip.innerHTML = `<strong>${res.name}</strong><br><span>${icon} ${label}</span>`;
   _bldTip.classList.add('visible');
   _moveBldTip(e);
 }
 function _moveBldTip(e) {
   _bldTip.style.left = (e.clientX + 14) + 'px';
-  _bldTip.style.top  = (e.clientY - 44) + 'px';
+  _bldTip.style.top  = (e.clientY - 52) + 'px';
 }
 function _hideBldTip() { _bldTip.classList.remove('visible'); }
 
@@ -1017,17 +1107,176 @@ function _selectBldRoom(roomId) {
   renderCalendar();
 }
 
-function initBuildingView() {
-  document.getElementById('res-view-cards-btn')?.addEventListener('click', () => switchResView('cards'));
-  document.getElementById('res-view-building-btn')?.addEventListener('click', () => switchResView('building'));
-
+function initBuildingRoomEvents() {
   document.querySelectorAll('#building-svg .bld-room').forEach(g => {
     const roomId = g.dataset.roomId;
     g.addEventListener('mouseenter', e => _showBldTip(e, roomId));
     g.addEventListener('mousemove',  e => _moveBldTip(e));
     g.addEventListener('mouseleave', _hideBldTip);
-    g.addEventListener('click', () => _selectBldRoom(roomId));
+    g.addEventListener('click',   () => _selectBldRoom(roomId));
     g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') _selectBldRoom(roomId); });
+  });
+}
+
+function initBuildingView() {
+  document.getElementById('res-view-cards-btn')?.addEventListener('click', () => switchResView('cards'));
+  document.getElementById('res-view-building-btn')?.addEventListener('click', () => switchResView('building'));
+}
+
+// ===== Resources: load from Supabase / localStorage / defaults =====
+async function loadResources() {
+  if (!useSupabase) {
+    try {
+      const stored = JSON.parse(localStorage.getItem('campusbook_resources') || 'null');
+      if (stored && stored.length) RESOURCES = stored;
+    } catch { /* use defaults */ }
+    return;
+  }
+  const { data, error } = await sbClient.from('resources').select('*').eq('active', true).order('sort_order');
+  if (error) { console.warn('loadResources:', error.message); return; }
+  if (!data || !data.length) { await seedResources(); return; }
+  RESOURCES = data.map(row => ({
+    id: row.id, name: row.name, type: row.type,
+    description: row.description || '',
+    floor: row.floor, capacity: row.capacity, img: row.img_url || '',
+  }));
+}
+
+async function seedResources() {
+  try {
+    const rows = DEFAULT_RESOURCES.map((r, i) => ({
+      id: r.id, name: r.name, type: r.type, description: r.description,
+      floor: r.floor, capacity: r.capacity, img_url: r.img, sort_order: i, active: true,
+    }));
+    const { error } = await sbClient.from('resources').insert(rows);
+    if (!error) RESOURCES = DEFAULT_RESOURCES.map(r => ({ ...r }));
+  } catch (e) { console.warn('seedResources:', e); }
+}
+
+// ===== Admin Panel =====
+function showAdminModal() {
+  renderAdminResourceList();
+  document.getElementById('admin-modal')?.classList.add('active');
+}
+function hideAdminModal() {
+  document.getElementById('admin-modal')?.classList.remove('active');
+  hideAdminForm();
+}
+function hideAdminForm() {
+  document.getElementById('admin-form-panel')?.classList.add('hidden');
+  document.getElementById('admin-resource-form')?.reset();
+  document.getElementById('admin-form-id').value = '';
+  document.getElementById('admin-form-error').textContent = '';
+}
+
+function renderAdminResourceList() {
+  const list = document.getElementById('admin-resource-list');
+  if (!list) return;
+  if (!RESOURCES.length) {
+    list.innerHTML = '<p class="empty-state">Нет ресурсов. Добавьте первый.</p>';
+    return;
+  }
+  list.innerHTML = RESOURCES.map(r => `
+    <div class="admin-res-row">
+      <div class="admin-res-info">
+        <span class="admin-res-name">${r.name}</span>
+        <span class="card-badge ${BADGE_CLASSES[r.type] || ''}">${TYPE_LABELS[r.type] || r.type}</span>
+        <span class="admin-res-meta">${r.floor} эт. · ${r.capacity} чел.</span>
+      </div>
+      <div class="admin-res-btns">
+        <button type="button" class="btn btn-ghost btn-sm" data-admin-edit="${r.id}">
+          <svg class="icon"><use href="#i-edit"/></svg>
+        </button>
+        <button type="button" class="btn btn-danger btn-sm" data-admin-delete="${r.id}">
+          <svg class="icon"><use href="#i-trash"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAdminForm(resource) {
+  const panel = document.getElementById('admin-form-panel');
+  panel?.classList.remove('hidden');
+  document.getElementById('admin-form-title').textContent = resource ? 'Редактировать ресурс' : 'Новый ресурс';
+  document.getElementById('admin-form-id').value       = resource?.id || '';
+  document.getElementById('admin-name').value          = resource?.name || '';
+  document.getElementById('admin-type').value          = resource?.type || 'room';
+  document.getElementById('admin-description').value   = resource?.description || '';
+  document.getElementById('admin-floor').value         = resource?.floor || 1;
+  document.getElementById('admin-capacity').value      = resource?.capacity || 1;
+  document.getElementById('admin-img').value           = resource?.img || '';
+  document.getElementById('admin-form-error').textContent = '';
+  panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function handleAdminFormSubmit(e) {
+  e.preventDefault();
+  const id          = document.getElementById('admin-form-id').value.trim();
+  const name        = document.getElementById('admin-name').value.trim();
+  const type        = document.getElementById('admin-type').value;
+  const description = document.getElementById('admin-description').value.trim();
+  const floor       = parseInt(document.getElementById('admin-floor').value) || 1;
+  const capacity    = parseInt(document.getElementById('admin-capacity').value) || 1;
+  const img         = document.getElementById('admin-img').value.trim();
+  const errorEl     = document.getElementById('admin-form-error');
+  if (!name) { errorEl.textContent = 'Введите название'; return; }
+
+  const resource = { id: id || ('r' + Date.now()), name, type, description, floor, capacity, img };
+
+  if (useSupabase) {
+    const row = { id: resource.id, name, type, description, floor, capacity, img_url: img, active: true };
+    const { error } = id
+      ? await sbClient.from('resources').update(row).eq('id', id)
+      : await sbClient.from('resources').insert(row);
+    if (error) { errorEl.textContent = error.message; return; }
+  }
+
+  if (id) {
+    const idx = RESOURCES.findIndex(r => r.id === id);
+    if (idx >= 0) RESOURCES[idx] = resource; else RESOURCES.push(resource);
+  } else {
+    RESOURCES.push(resource);
+  }
+  if (!useSupabase) localStorage.setItem('campusbook_resources', JSON.stringify(RESOURCES));
+
+  populateResourceSelect();
+  renderCards();
+  renderBuildingSVG();
+  hideAdminForm();
+  renderAdminResourceList();
+  showToast(id ? 'Ресурс обновлён' : 'Ресурс добавлен');
+}
+
+async function handleAdminDelete(resourceId) {
+  if (!confirm('Удалить ресурс? Существующие брони сохранятся.')) return;
+  if (useSupabase) {
+    const { error } = await sbClient.from('resources').update({ active: false }).eq('id', resourceId);
+    if (error) { showToast('Ошибка: ' + error.message); return; }
+  }
+  RESOURCES = RESOURCES.filter(r => r.id !== resourceId);
+  if (!useSupabase) localStorage.setItem('campusbook_resources', JSON.stringify(RESOURCES));
+  populateResourceSelect();
+  renderCards();
+  renderBuildingSVG();
+  renderAdminResourceList();
+  showToast('Ресурс удалён');
+}
+
+function initAdmin() {
+  document.getElementById('btn-admin')?.addEventListener('click', showAdminModal);
+  document.getElementById('admin-modal-close')?.addEventListener('click', hideAdminModal);
+  document.getElementById('admin-modal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('admin-modal')) hideAdminModal();
+  });
+  document.getElementById('admin-add-btn')?.addEventListener('click', () => openAdminForm(null));
+  document.getElementById('admin-form-cancel')?.addEventListener('click', hideAdminForm);
+  document.getElementById('admin-resource-form')?.addEventListener('submit', handleAdminFormSubmit);
+  document.getElementById('admin-resource-list')?.addEventListener('click', e => {
+    const editId = e.target.closest('[data-admin-edit]')?.dataset.adminEdit;
+    const delId  = e.target.closest('[data-admin-delete]')?.dataset.adminDelete;
+    if (editId) { const res = RESOURCES.find(r => r.id === editId); if (res) openAdminForm(res); }
+    if (delId)  handleAdminDelete(delId);
   });
 }
 
@@ -1039,16 +1288,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   initClarity();
 
+  await initSupabaseAndAuth();
+  await loadResources();
+  if (!useSupabase) { renderBookings(); renderStats(); }
   populateResourceSelect();
   renderCards('all');
   initFilters();
   initSearch();
-
-  await initSupabaseAndAuth();
-  if (!useSupabase) { renderBookings(); renderStats(); }
   initFullCalendar();
   initBuildingView();
+  renderBuildingSVG();
   renderCalendar();
+  initAdmin();
 
   // Booking form
   $('#booking-form').addEventListener('submit', handleBookingSubmit);
@@ -1158,8 +1409,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'success.html';
   });
 
-  // FullCalendar handles now-indicator internally; refresh events every minute
-  setInterval(() => { if (fcCalendar) fcCalendar.refetchEvents(); }, 60000);
+  // Refresh calendar + building every minute
+  setInterval(() => {
+    if (fcCalendar) fcCalendar.refetchEvents();
+    updateBuildingStatus();
+  }, 60000);
 });
 
 // expose for onclick attrs

@@ -72,6 +72,40 @@ create policy "profiles_update_own_name"
   using (id = auth.uid())
   with check (id = auth.uid() and paid = (select paid from public.profiles where id = auth.uid()));
 
+-- Флаг администратора (выставляется вручную в Supabase dashboard)
+alter table public.profiles add column if not exists is_admin boolean not null default false;
+
+-- =========================================================
+-- 3) Таблица resources (редактируемый каталог ресурсов)
+-- =========================================================
+create table if not exists public.resources (
+  id          text primary key,
+  name        text not null,
+  type        text not null check (type in ('room','coworking','equipment','consultation')),
+  description text,
+  floor       integer not null default 1,
+  capacity    integer not null default 1,
+  img_url     text,
+  active      boolean not null default true,
+  sort_order  integer default 0,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.resources enable row level security;
+
+-- Все видят активные ресурсы
+drop policy if exists "resources_select" on public.resources;
+create policy "resources_select"
+  on public.resources for select
+  using (active = true);
+
+-- Только is_admin = true могут изменять
+drop policy if exists "resources_write" on public.resources;
+create policy "resources_write"
+  on public.resources for all to authenticated
+  using     ((select is_admin from public.profiles where id = auth.uid()))
+  with check((select is_admin from public.profiles where id = auth.uid()));
+
 -- Обновление updated_at триггером
 create or replace function public.touch_updated_at()
 returns trigger language plpgsql as $$
