@@ -236,14 +236,15 @@ function updateAuthUI() {
   }
   // Admin button: no Supabase (dev) OR adminEmail match OR is_admin flag
   const adminBtn = document.getElementById('btn-admin');
-  if (adminBtn) {
-    const cfgAdminEmail = window.CAMPUSBOOK_SUPABASE?.adminEmail?.trim().toLowerCase();
-    const userEmail = currentUser?.email?.trim().toLowerCase();
-    const isAdmin = !useSupabase
-      || (currentUser && currentProfile?.is_admin)
-      || (currentUser && cfgAdminEmail && userEmail === cfgAdminEmail);
-    adminBtn.classList.toggle('hidden', !isAdmin);
-  }
+  if (adminBtn) adminBtn.classList.toggle('hidden', !isAdminUser());
+}
+
+function isAdminUser() {
+  const cfgAdminEmail = window.CAMPUSBOOK_SUPABASE?.adminEmail?.trim().toLowerCase();
+  const userEmail = currentUser?.email?.trim().toLowerCase();
+  return !useSupabase
+    || (currentUser && currentProfile?.is_admin)
+    || (currentUser && cfgAdminEmail && userEmail === cfgAdminEmail);
 }
 
 function renderProfileMenuStats() {
@@ -1134,7 +1135,8 @@ function _showBldTip(e, roomId) {
   if (!res) return;
   const { status, label } = getDetailedRoomStatus(roomId);
   const icon = { free: '🟢', busy: '🔴', mine: '🔵' }[status] || '⚪';
-  _bldTip.innerHTML = `<strong>${res.name}</strong><br><span>${icon} ${label}</span>`;
+  const adminHint = isAdminUser() ? '<br><em style="opacity:.7;font-size:.8em">✏️ Нажмите для редактирования</em>' : '';
+  _bldTip.innerHTML = `<strong>${res.name}</strong><br><span>${icon} ${label}</span>${adminHint}`;
   _bldTip.classList.add('visible');
   _moveBldTip(e);
 }
@@ -1145,6 +1147,14 @@ function _moveBldTip(e) {
 function _hideBldTip() { _bldTip.classList.remove('visible'); }
 
 function _selectBldRoom(roomId) {
+  if (isAdminUser()) {
+    const res = RESOURCES.find(r => r.id === roomId);
+    if (res) {
+      showAdminModal();
+      openAdminForm(res);
+      return;
+    }
+  }
   calResourceId = roomId;
   const sel = document.getElementById('resource-select');
   if (sel) sel.value = roomId;
@@ -1299,7 +1309,11 @@ async function handleAdminDelete(resourceId) {
   if (!confirm('Удалить ресурс? Существующие брони сохранятся.')) return;
   if (useSupabase) {
     const { error } = await sbClient.from('resources').update({ active: false }).eq('id', resourceId);
-    if (error) { showToast('Ошибка: ' + error.message); return; }
+    if (error) {
+      showToast('Ошибка удаления: ' + error.message, 'error');
+      console.error('Admin delete error:', error);
+      return;
+    }
   }
   RESOURCES = RESOURCES.filter(r => r.id !== resourceId);
   if (!useSupabase) localStorage.setItem('campusbook_resources', JSON.stringify(RESOURCES));

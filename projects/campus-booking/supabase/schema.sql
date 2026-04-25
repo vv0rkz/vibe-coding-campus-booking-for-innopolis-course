@@ -115,3 +115,24 @@ drop trigger if exists profiles_touch_updated_at on public.profiles;
 create trigger profiles_touch_updated_at
 before update on public.profiles
 for each row execute function public.touch_updated_at();
+
+-- =========================================================
+-- 4) Автоматически выставлять is_admin для известных email
+-- =========================================================
+-- Триггер: при создании профиля проверяет email и ставит is_admin
+create or replace function public.set_admin_by_email()
+returns trigger language plpgsql security definer as $$
+begin
+  if new.email = 'admin@campusbook.ru' then
+    new.is_admin := true;
+  end if;
+  return new;
+end; $$;
+
+drop trigger if exists profiles_set_admin on public.profiles;
+create trigger profiles_set_admin
+before insert on public.profiles
+for each row execute function public.set_admin_by_email();
+
+-- Одноразовый апдейт для уже зарегистрированных admin-аккаунтов:
+update public.profiles set is_admin = true where email = 'admin@campusbook.ru';
